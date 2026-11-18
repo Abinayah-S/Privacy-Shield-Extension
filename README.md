@@ -290,3 +290,39 @@ John runs a website and wants to see how much tracking occurs. He adds his domai
 
 Use Case 3: Corporate Deployment
 A company installs Tracker Blocker on all employee computers to prevent corporate espionage through browser tracking.
+
+---
+
+# Version 1.3: Filter lists
+
+Privacy Shield now ships about **213,000 network rules** generated from public filter lists, in four categories you can toggle in the popup:
+
+| Category | Rulesets | Rules | Source |
+|---|---|---|---|
+| Core | `rules.json` | 107 | Hand-curated tracker domains |
+| Advertising | `ads_1`, `ads_2` | 48,517 | EasyList |
+| Trackers | `privacy_1`, `privacy_2` | 54,090 | EasyPrivacy, uBO privacy |
+| Malware and badware | `badware_1` to `badware_4` | 110,398 | uBO badware, URLhaus |
+
+## Rebuilding the rulesets
+
+```bash
+python3 tools/build_rules.py <easylist.txt> --out-prefix rulesets/ads --start-id 1
+python3 tools/build_rules.py <easyprivacy.txt> <uBO privacy.txt> --out-prefix rulesets/privacy --start-id 100001
+python3 tools/build_rules.py <badware.txt> <urlhaus.txt> --out-prefix rulesets/badware --start-id 200001 --no-main-frame
+```
+
+The converter prints an accepted count and a skip count by reason. Skipped filters are cosmetic rules, regular expressions, `$popup`, `$redirect`, `$removeparam`, and other options that Declarative Net Request cannot express.
+
+## What the conversion does and does not cover
+
+- Supported: domain anchors, separators, wildcards, `@@` exceptions, resource-type options, `third-party`, `domain=` (as initiator conditions), and `$important`.
+- Not supported: cosmetic hiding (needs content scripts), scriptlets, response modification, `$popup`, and regular expressions. These account for most of what makes uBlock Origin stronger than this extension.
+- `--no-main-frame` on the malware set means whole pages are not blocked, so sites do not break. Malicious subresources are still blocked.
+
+## Known limits
+
+- Rulesets are loaded by Chrome on every browser start. Combined size is about 60 MB uncompressed. Use `chrome.declarativeNetRequest.getAvailableStaticRuleCount()` to check headroom on your browser before relying on all categories.
+- Statistics are attributed to the list domain or path that matched. Matches in the same polling window that fall outside the 200 entry log are still counted.
+- Statistics update at most every 30 seconds in packed builds.
+- This is still a DNR-based blocker. It does not replace uBlock Origin for cosmetic filtering.

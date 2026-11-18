@@ -19,6 +19,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await renderRules();
 
+  const { categories = {} } = await chrome.storage.local.get(["categories"]);
+  document.querySelectorAll(".cat-toggle").forEach((cb) => {
+    const key = cb.dataset.cat;
+    cb.checked = categories[key] !== false;
+    cb.addEventListener("change", async () => {
+      await chrome.runtime.sendMessage({ type: "SET_CATEGORY", category: key, enabled: cb.checked });
+    });
+  });
+
   toggleSwitch.addEventListener("change", async () => {
     const newVal = toggleSwitch.checked;
     updateUI(newVal);

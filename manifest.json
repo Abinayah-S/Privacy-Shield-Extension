@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Privacy Shield",
-  "version": "1.2.0",
-  "description": "Blocks known tracking scripts and domains. Whitelist, blacklist, per-domain statistics, and badge counter.",
+  "version": "1.3.0",
+  "description": "Blocks tracking, advertising, and known malware domains using curated filter lists (EasyList, EasyPrivacy, uBO). Per-list toggles, whitelist, blacklist, statistics.",
   "permissions": [
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
@@ -35,9 +35,49 @@
   "declarative_net_request": {
     "rule_resources": [
       {
-        "id": "static_blocklist",
+        "id": "core",
         "enabled": true,
         "path": "rules.json"
+      },
+      {
+        "id": "ads_1",
+        "enabled": true,
+        "path": "rulesets/ads_1.json"
+      },
+      {
+        "id": "ads_2",
+        "enabled": true,
+        "path": "rulesets/ads_2.json"
+      },
+      {
+        "id": "badware_1",
+        "enabled": true,
+        "path": "rulesets/badware_1.json"
+      },
+      {
+        "id": "badware_2",
+        "enabled": true,
+        "path": "rulesets/badware_2.json"
+      },
+      {
+        "id": "badware_3",
+        "enabled": true,
+        "path": "rulesets/badware_3.json"
+      },
+      {
+        "id": "badware_4",
+        "enabled": true,
+        "path": "rulesets/badware_4.json"
+      },
+      {
+        "id": "privacy_1",
+        "enabled": true,
+        "path": "rulesets/privacy_1.json"
+      },
+      {
+        "id": "privacy_2",
+        "enabled": true,
+        "path": "rulesets/privacy_2.json"
       }
     ]
   }

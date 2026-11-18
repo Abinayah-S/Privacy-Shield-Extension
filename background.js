@@ -1,24 +1,31 @@
-// Privacy Shield v1.2 background service worker
-// Changes from 1.1: alarms instead of setInterval (MV3 workers are killed when idle),
-// getMatchedRules with minTimeStamp instead of a running-count delta,
-// domain attribution through rule IDs (works in packed builds), no double counting,
-// enabled state restored on browser startup, real CLEAR_DATA behaviour.
+// Privacy Shield v1.3 background service worker
+//
+// Model:
+//   - Each filter list category (core, ads, privacy, badware) is one or more DNR static rulesets.
+//   - Categories are toggled independently and the master switch overrides them all.
+//   - Rule IDs are unique only within a ruleset, so matches are keyed by rulesetId + ruleId.
+//   - Static ruleset contents are parsed lazily, only for rulesets that actually matched,
+//     to keep service worker wake-up cheap.
+//   - Polling uses chrome.alarms (MV3 workers are killed when idle).
 
-const STATIC_RULESET = "static_blocklist";
 const POLL_ALARM = "pollMatches";
-const POLL_MINUTES = 0.5; // Chrome enforces a 30 second minimum for packed extensions
+const POLL_MINUTES = 0.5; // 30 second floor for packed extensions
+const DYNAMIC = "_dynamic";
+const CATEGORY_RULESETS = {}; // filled from manifest at startup, see categoryForRuleset()
 
-let staticDomainMap = null; // ruleId -> domain, loaded from rules.json
+const rulesetCache = new Map(); // rulesetId -> Map(ruleId -> display domain)
 let polling = false;
 
 function todayString() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function cleanDomain(urlFilter) {
+function cleanFilter(urlFilter) {
   return (urlFilter || "")
     .replace(/^\|\|/, "")
+    .replace(/^\|/, "")
     .replace(/\^$/, "")
+    .replace(/\|$/, "")
     .replace(/^www\./, "");
 }
 
@@ -26,31 +33,66 @@ function freshStats() {
   return { totalBlocked: 0, todayBlocked: 0, lastResetDate: todayString(), uniqueTrackers: {} };
 }
 
-async function loadStaticMap() {
-  if (staticDomainMap) return staticDomainMap;
-  staticDomainMap = {};
-  try {
-    const res = await fetch(chrome.runtime.getURL("rules.json"));
-    const rules = await res.json();
-    for (const r of rules) staticDomainMap[r.id] = cleanDomain(r.condition.urlFilter);
-  } catch (e) {
-    console.error("Privacy Shield: could not load rules.json", e);
-  }
-  return staticDomainMap;
+// Which category a manifest ruleset id belongs to: "ads_1" -> "ads", "core" -> "core"
+function categoryFor(rulesetId) {
+  return rulesetId.replace(/_\d+$/, "");
 }
 
-async function applyEnabled(enabled) {
-  if (enabled) {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds: [STATIC_RULESET] });
+function allRulesetIds() {
+  const manifest = chrome.runtime.getManifest();
+  return (manifest.declarative_net_request?.rule_resources || []).map(r => r.id);
+}
+
+async function getCategories() {
+  const { categories } = await chrome.storage.local.get(["categories"]);
+  const defaults = { core: true, ads: true, privacy: true, badware: true };
+  return { ...defaults, ...(categories || {}) };
+}
+
+async function applyState() {
+  const { enabled } = await chrome.storage.local.get(["enabled"]);
+  const masterOn = enabled !== false;
+  const cats = await getCategories();
+  const ids = allRulesetIds();
+  const toEnable = [];
+  const toDisable = [];
+  for (const id of ids) {
+    const on = masterOn && cats[categoryFor(id)] !== false;
+    (on ? toEnable : toDisable).push(id);
+  }
+  await chrome.declarativeNetRequest.updateEnabledRulesets({
+    enableRulesetIds: toEnable,
+    disableRulesetIds: toDisable
+  });
+  if (masterOn) {
     chrome.action.setBadgeText({ text: "" });
   } else {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: [STATIC_RULESET] });
     chrome.action.setBadgeText({ text: "OFF" });
     chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
   }
 }
 
-// Records blocked requests that happened since the last poll.
+// Load a ruleset file once, keep ruleId -> domain for later attribution.
+async function loadRuleset(rulesetId) {
+  if (rulesetCache.has(rulesetId)) return rulesetCache.get(rulesetId);
+  const map = new Map();
+  try {
+    const res = await fetch(chrome.runtime.getURL(findPath(rulesetId)));
+    const rules = await res.json();
+    for (const r of rules) map.set(r.id, cleanFilter(r.condition.urlFilter));
+  } catch (e) {
+    console.error("Privacy Shield: could not load ruleset", rulesetId, e);
+  }
+  rulesetCache.set(rulesetId, map);
+  return map;
+}
+
+function findPath(rulesetId) {
+  const r = chrome.runtime.getManifest().declarative_net_request.rule_resources.find(x => x.id === rulesetId);
+  return r ? r.path : "";
+}
+
+// Record blocked requests since the last poll.
 async function recordMatches() {
   if (polling) return;
   polling = true;
@@ -62,10 +104,9 @@ async function recordMatches() {
     const since = lastPoll ?? Date.now();
     const now = Date.now();
 
-    const statics = await loadStaticMap();
     const dynamic = await chrome.declarativeNetRequest.getDynamicRules();
     const dynMap = new Map(dynamic.map(r => [r.id, {
-      domain: cleanDomain(r.condition.urlFilter || (r.condition.requestDomains || [])[0]),
+      domain: cleanFilter(r.condition.urlFilter || (r.condition.requestDomains || [])[0]),
       type: r.action.type
     }]));
 
@@ -81,20 +122,23 @@ async function recordMatches() {
 
     let added = 0;
     for (const hit of rulesMatchedInfo) {
-      const id = hit.rule.ruleId;
+      const rulesetId = hit.rule.rulesetId;
+      const ruleId = hit.rule.ruleId;
       let domain = null;
-      if (dynMap.has(id)) {
-        const info = dynMap.get(id);
-        if (info.type !== "block") continue; // allow rules are not blocks
+
+      if (rulesetId === DYNAMIC) {
+        const info = dynMap.get(ruleId);
+        if (!info || info.type !== "block") continue; // allow matches are not blocks
         domain = info.domain;
-      } else if (statics[id]) {
-        domain = statics[id];
+      } else {
+        const map = await loadRuleset(rulesetId);
+        domain = map.get(ruleId);
       }
       if (!domain) continue;
 
       added++;
       stats.uniqueTrackers[domain] = (stats.uniqueTrackers[domain] || 0) + 1;
-      log.unshift({ domain, time: hit.timeStamp || now, tabId: hit.tabId });
+      log.unshift({ domain, time: hit.timeStamp || now, tabId: hit.tabId, list: categoryFor(rulesetId) });
     }
 
     if (log.length > 200) log.length = 200;
@@ -124,47 +168,48 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 chrome.runtime.onInstalled.addListener(async () => {
-  const stored = await chrome.storage.local.get(["enabled", "stats", "trackerLog", "whitelist", "blacklist"]);
+  const stored = await chrome.storage.local.get(["enabled", "stats", "trackerLog", "whitelist", "blacklist", "categories"]);
   const defaults = {};
   if (stored.enabled === undefined) defaults.enabled = true;
   if (!stored.stats) defaults.stats = freshStats();
   if (!stored.trackerLog) defaults.trackerLog = [];
   if (!stored.whitelist) defaults.whitelist = [];
   if (!stored.blacklist) defaults.blacklist = [];
+  if (!stored.categories) defaults.categories = { core: true, ads: true, privacy: true, badware: true };
   defaults.lastPoll = Date.now();
   await chrome.storage.local.set(defaults);
-
-  await loadStaticMap();
-  await applyEnabled(defaults.enabled ?? stored.enabled);
+  await applyState();
   await ensureAlarm();
 });
 
-// The manifest enables the static ruleset on every start, so re-apply the user's choice.
+// The manifest enables every ruleset on each start, so re-apply the user's choices.
 chrome.runtime.onStartup.addListener(async () => {
-  const { enabled } = await chrome.storage.local.get(["enabled"]);
-  await loadStaticMap();
-  await applyEnabled(enabled !== false);
+  await applyState();
   await ensureAlarm();
   await chrome.storage.local.set({ lastPoll: Date.now() });
 });
 
-// Service worker wake-up outside install/startup: make sure the alarm exists.
+// Service worker woke up for another reason: make sure the alarm exists and state is correct.
 ensureAlarm();
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     if (msg.type === "TOGGLE_EXTENSION") {
       await chrome.storage.local.set({ enabled: msg.enabled });
-      await applyEnabled(msg.enabled);
+      await applyState();
+      sendResponse({ ok: true });
+    } else if (msg.type === "SET_CATEGORY") {
+      const cats = await getCategories();
+      cats[msg.category] = msg.enabled;
+      await chrome.storage.local.set({ categories: cats });
+      await applyState();
       sendResponse({ ok: true });
     } else if (msg.type === "CLEAR_DATA") {
       const dyn = await chrome.declarativeNetRequest.getDynamicRules();
       if (dyn.length) {
         await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: dyn.map(r => r.id) });
       }
-      const { enabled } = await chrome.storage.local.get(["enabled"]);
       await chrome.storage.local.set({
-        enabled: enabled !== false,
         whitelist: [],
         blacklist: [],
         stats: freshStats(),
@@ -174,9 +219,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       chrome.action.setBadgeText({ text: "" });
       chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
       sendResponse({ ok: true });
-    } else if (msg.type === "GET_STATIC_DOMAINS") {
-      const map = await loadStaticMap();
-      sendResponse({ domains: [...new Set(Object.values(map))] });
+    } else if (msg.type === "GET_STATS_META") {
+      const cats = await getCategories();
+      const ids = allRulesetIds();
+      const counts = {};
+      for (const id of ids) {
+        const c = categoryFor(id);
+        counts[c] = (counts[c] || 0) + 1;
+      }
+      sendResponse({ categories: cats, rulesetCounts: counts });
     }
   })();
   return true;
