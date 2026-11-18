@@ -11,17 +11,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const footerToday  = document.getElementById("footerToday");
   const optionsBtn   = document.getElementById("optionsBtn");
 
-  // Show blocked count for this page (badge text)
-  const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (activeTab) {
-    try {
-      const badgeText = await chrome.action.getBadgeText({ tabId: activeTab.id });
-      counterEl.textContent = (badgeText && badgeText !== "OFF") ? badgeText : "0";
-    } catch {
-      counterEl.textContent = "0";
-    }
-  }
-
   const stored = await chrome.storage.local.get(["enabled", "stats"]);
   const isEnabled = stored.enabled !== false;
   toggleSwitch.checked = isEnabled;
@@ -48,13 +37,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   setInterval(async () => {
     const s = await chrome.storage.local.get(["stats"]);
     updateFooter(s.stats);
-    // Also update the circle with the badge (today's page count stays from badge)
-    if (activeTab) {
-      try {
-        const badgeText = await chrome.action.getBadgeText({ tabId: activeTab.id });
-        if (badgeText && badgeText !== "OFF") counterEl.textContent = badgeText;
-      } catch {}
-    }
   }, 2000);
 
   function updateFooter(stats) {
@@ -62,6 +44,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const today = stats?.todayBlocked || 0;
     footerStats.textContent = `Total: ${total}`;
     footerToday.textContent = `Today: ${today}`;
+    if (toggleSwitch.checked) counterEl.textContent = String(today);
   }
 
   function updateUI(enabled) {

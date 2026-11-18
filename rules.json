@@ -6,22 +6,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "google-analytics.com",
-      "resourceTypes": [
-        "script",
-        "xmlhttprequest",
-        "image"
-      ]
-    }
-  },
-  {
-    "id": 2,
-    "priority": 1,
-    "action": {
-      "type": "block"
-    },
-    "condition": {
-      "urlFilter": "www.google-analytics.com",
+      "urlFilter": "||google-analytics.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -36,7 +21,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "analytics.google.com",
+      "urlFilter": "||analytics.google.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -51,7 +36,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "googletagmanager.com",
+      "urlFilter": "||googletagmanager.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -66,7 +51,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "doubleclick.net",
+      "urlFilter": "||doubleclick.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -81,7 +66,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "pagead2.googlesyndication.com",
+      "urlFilter": "||pagead2.googlesyndication.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -96,7 +81,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "pagead1.googlesyndication.com",
+      "urlFilter": "||pagead1.googlesyndication.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -111,7 +96,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "facebook.net",
+      "urlFilter": "||facebook.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -126,7 +111,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "connect.facebook.net",
+      "urlFilter": "||connect.facebook.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -141,7 +126,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "ads.yahoo.com",
+      "urlFilter": "||ads.yahoo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -156,7 +141,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "scorecardresearch.com",
+      "urlFilter": "||scorecardresearch.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -171,7 +156,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "hotjar.com",
+      "urlFilter": "||hotjar.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -186,7 +171,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "mixpanel.com",
+      "urlFilter": "||mixpanel.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -201,7 +186,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "segment.io",
+      "urlFilter": "||segment.io^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -216,7 +201,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "amplitude.com",
+      "urlFilter": "||amplitude.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -231,7 +216,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "hs-analytics.net",
+      "urlFilter": "||hs-analytics.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -246,7 +231,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "hs-scripts.com",
+      "urlFilter": "||hs-scripts.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -261,7 +246,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "fullstory.com",
+      "urlFilter": "||fullstory.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -276,7 +261,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "intercom.io",
+      "urlFilter": "||intercom.io^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -291,7 +276,7 @@
       "type": "block"
     },
     "condition": {
-      "urlFilter": "drift.com",
+      "urlFilter": "||drift.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -307,7 +292,7 @@
     },
     "comment": "AppNexus (Xandr / Microsoft Ads DSP)",
     "condition": {
-      "urlFilter": "adnxs.com",
+      "urlFilter": "||adnxs.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -324,7 +309,7 @@
     },
     "comment": "Criteo \u2014 aggressive retargeting ad network",
     "condition": {
-      "urlFilter": "criteo.com",
+      "urlFilter": "||criteo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -341,7 +326,7 @@
     },
     "comment": "Taboola \u2014 low-quality sponsored content ads",
     "condition": {
-      "urlFilter": "taboola.com",
+      "urlFilter": "||taboola.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -358,7 +343,7 @@
     },
     "comment": "Outbrain \u2014 sponsored content / clickbait ad delivery",
     "condition": {
-      "urlFilter": "outbrain.com",
+      "urlFilter": "||outbrain.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -375,7 +360,7 @@
     },
     "comment": "Amazon DSP \u2014 Amazon's cross-site advertising network",
     "condition": {
-      "urlFilter": "amazon-adsystem.com",
+      "urlFilter": "||amazon-adsystem.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -392,7 +377,7 @@
     },
     "comment": "Revcontent \u2014 clickbait and native ad platform",
     "condition": {
-      "urlFilter": "revcontent.com",
+      "urlFilter": "||revcontent.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -409,7 +394,7 @@
     },
     "comment": "Media.net \u2014 Yahoo/Bing contextual ad network",
     "condition": {
-      "urlFilter": "media.net",
+      "urlFilter": "||media.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -426,7 +411,7 @@
     },
     "comment": "Advertising.com (AOL / Verizon ad network)",
     "condition": {
-      "urlFilter": "advertising.com",
+      "urlFilter": "||advertising.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -443,7 +428,7 @@
     },
     "comment": "Zedo \u2014 display and pop-up advertising network",
     "condition": {
-      "urlFilter": "zedo.com",
+      "urlFilter": "||zedo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -460,7 +445,7 @@
     },
     "comment": "AdRoll \u2014 retargeting platform that follows you everywhere",
     "condition": {
-      "urlFilter": "adroll.com",
+      "urlFilter": "||adroll.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -477,7 +462,7 @@
     },
     "comment": "Pubmatic \u2014 programmatic ad exchange",
     "condition": {
-      "urlFilter": "pubmatic.com",
+      "urlFilter": "||pubmatic.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -494,7 +479,7 @@
     },
     "comment": "Rubiconproject (Magnite) \u2014 RTB ad auction platform",
     "condition": {
-      "urlFilter": "rubiconproject.com",
+      "urlFilter": "||rubiconproject.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -511,7 +496,7 @@
     },
     "comment": "OpenX \u2014 open-source real-time bidding ad server",
     "condition": {
-      "urlFilter": "openx.net",
+      "urlFilter": "||openx.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -528,7 +513,7 @@
     },
     "comment": "Sovrn / VigLink \u2014 affiliate and ad tracking",
     "condition": {
-      "urlFilter": "sovrn.com",
+      "urlFilter": "||sovrn.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -544,7 +529,7 @@
     },
     "comment": "VigLink / Sovrn Commerce \u2014 monetizes outbound links",
     "condition": {
-      "urlFilter": "viglink.com",
+      "urlFilter": "||viglink.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -560,7 +545,7 @@
     },
     "comment": "Conversant / ValueClick \u2014 behavioral ad targeting",
     "condition": {
-      "urlFilter": "conversantmedia.com",
+      "urlFilter": "||conversantmedia.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -576,7 +561,7 @@
     },
     "comment": "Yieldmo \u2014 scroll-based aggressive ads",
     "condition": {
-      "urlFilter": "yieldmo.com",
+      "urlFilter": "||yieldmo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -593,7 +578,7 @@
     },
     "comment": "The Trade Desk \u2014 programmatic DSP",
     "condition": {
-      "urlFilter": "adsrvr.org",
+      "urlFilter": "||adsrvr.org^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -610,7 +595,7 @@
     },
     "comment": "Index Exchange \u2014 programmatic advertising exchange",
     "condition": {
-      "urlFilter": "casalemedia.com",
+      "urlFilter": "||casalemedia.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -627,7 +612,7 @@
     },
     "comment": "TripleLift \u2014 native advertising platform",
     "condition": {
-      "urlFilter": "3lift.com",
+      "urlFilter": "||3lift.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -644,7 +629,7 @@
     },
     "comment": "Mouseflow \u2014 mouse movement and session recording",
     "condition": {
-      "urlFilter": "mouseflow.com",
+      "urlFilter": "||mouseflow.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -660,7 +645,7 @@
     },
     "comment": "Lucky Orange \u2014 heatmaps and visitor recording",
     "condition": {
-      "urlFilter": "luckyorange.com",
+      "urlFilter": "||luckyorange.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -676,7 +661,7 @@
     },
     "comment": "Crazy Egg \u2014 A/B testing and heatmaps",
     "condition": {
-      "urlFilter": "crazyegg.com",
+      "urlFilter": "||crazyegg.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -692,7 +677,7 @@
     },
     "comment": "Quantcast \u2014 audience measurement and surveillance",
     "condition": {
-      "urlFilter": "quantserve.com",
+      "urlFilter": "||quantserve.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -708,7 +693,7 @@
     },
     "comment": "Quantcast tag",
     "condition": {
-      "urlFilter": "quantcount.com",
+      "urlFilter": "||quantcount.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -724,7 +709,7 @@
     },
     "comment": "Nielsen Marketing Cloud \u2014 demographics and profiling",
     "condition": {
-      "urlFilter": "exelator.com",
+      "urlFilter": "||exelator.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -740,7 +725,7 @@
     },
     "comment": "Comscore \u2014 audience analytics beacons",
     "condition": {
-      "urlFilter": "comscore.com",
+      "urlFilter": "||comscore.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -756,7 +741,7 @@
     },
     "comment": "LiveRamp ATS \u2014 identity resolution and cross-device tracking",
     "condition": {
-      "urlFilter": "liveramp.com",
+      "urlFilter": "||liveramp.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -772,7 +757,7 @@
     },
     "comment": "Verizon / Oath ad tracking",
     "condition": {
-      "urlFilter": "oath.com",
+      "urlFilter": "||oath.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -788,7 +773,7 @@
     },
     "comment": "Lotame \u2014 data management and audience profiling",
     "condition": {
-      "urlFilter": "crwdcntrl.net",
+      "urlFilter": "||crwdcntrl.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -804,7 +789,7 @@
     },
     "comment": "AddThis (Oracle) \u2014 social sharing buttons with tracking",
     "condition": {
-      "urlFilter": "addthis.com",
+      "urlFilter": "||addthis.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -820,7 +805,7 @@
     },
     "comment": "ShareThis \u2014 social sharing and tracking",
     "condition": {
-      "urlFilter": "sharethis.com",
+      "urlFilter": "||sharethis.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -836,7 +821,7 @@
     },
     "comment": "Datalogix (Oracle) \u2014 offline purchase data matching",
     "condition": {
-      "urlFilter": "datalogix.com",
+      "urlFilter": "||datalogix.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -852,7 +837,7 @@
     },
     "comment": "Bluekai (Oracle) \u2014 real-time data marketplace",
     "condition": {
-      "urlFilter": "bluekai.com",
+      "urlFilter": "||bluekai.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -868,7 +853,7 @@
     },
     "comment": "Krux/Salesforce DMP \u2014 data management platform",
     "condition": {
-      "urlFilter": "krxd.net",
+      "urlFilter": "||krxd.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -884,7 +869,7 @@
     },
     "comment": "Drawbridge \u2014 cross-device identity graph",
     "condition": {
-      "urlFilter": "rlcdn.com",
+      "urlFilter": "||rlcdn.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -900,7 +885,7 @@
     },
     "comment": "DoubleVerify \u2014 ad verification and audience surveillance",
     "condition": {
-      "urlFilter": "doubleverify.com",
+      "urlFilter": "||doubleverify.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -916,7 +901,7 @@
     },
     "comment": "IAS (Integral Ad Science) \u2014 ad measurement and surveillance",
     "condition": {
-      "urlFilter": "iasds01.com",
+      "urlFilter": "||iasds01.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -932,7 +917,7 @@
     },
     "comment": "MOAT (Oracle) \u2014 video and display ad verification",
     "condition": {
-      "urlFilter": "moatads.com",
+      "urlFilter": "||moatads.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -948,7 +933,7 @@
     },
     "comment": "Ensighten \u2014 tag management and data collection",
     "condition": {
-      "urlFilter": "ensighten.com",
+      "urlFilter": "||ensighten.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -964,7 +949,7 @@
     },
     "comment": "TikTok analytics / event pixel",
     "condition": {
-      "urlFilter": "analytics.tiktok.com",
+      "urlFilter": "||analytics.tiktok.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -980,7 +965,7 @@
     },
     "comment": "LinkedIn Insight Tag \u2014 cross-site professional tracking",
     "condition": {
-      "urlFilter": "snap.licdn.com",
+      "urlFilter": "||snap.licdn.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -996,7 +981,7 @@
     },
     "comment": "Pinterest Tag \u2014 conversion and retargeting",
     "condition": {
-      "urlFilter": "ct.pinterest.com",
+      "urlFilter": "||ct.pinterest.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1012,7 +997,7 @@
     },
     "comment": "Snapchat Pixel",
     "condition": {
-      "urlFilter": "tr.snapchat.com",
+      "urlFilter": "||tr.snapchat.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1028,7 +1013,7 @@
     },
     "comment": "Reddit Ads Pixel",
     "condition": {
-      "urlFilter": "alb.reddit.com",
+      "urlFilter": "||alb.reddit.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1044,7 +1029,7 @@
     },
     "comment": "Twitter/X ad and analytics pixel",
     "condition": {
-      "urlFilter": "analytics.twitter.com",
+      "urlFilter": "||analytics.twitter.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1060,7 +1045,7 @@
     },
     "comment": "Quora Pixel \u2014 conversion tracking",
     "condition": {
-      "urlFilter": "qsbr.quora.com",
+      "urlFilter": "||qsbr.quora.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1076,7 +1061,7 @@
     },
     "comment": "Marketo Munchkin \u2014 lead tracking across sites",
     "condition": {
-      "urlFilter": "munchkin.marketo.net",
+      "urlFilter": "||munchkin.marketo.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1092,7 +1077,7 @@
     },
     "comment": "Pardot (Salesforce) \u2014 B2B tracking beacon",
     "condition": {
-      "urlFilter": "pi.pardot.com",
+      "urlFilter": "||pi.pardot.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1108,7 +1093,7 @@
     },
     "comment": "Eloqua (Oracle) \u2014 marketing automation tracker",
     "condition": {
-      "urlFilter": "eloqua.com",
+      "urlFilter": "||eloqua.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1124,7 +1109,7 @@
     },
     "comment": "Klaviyo \u2014 email and behavioral tracking",
     "condition": {
-      "urlFilter": "a.klaviyo.com",
+      "urlFilter": "||a.klaviyo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1140,7 +1125,7 @@
     },
     "comment": "ActiveCampaign tracking beacon",
     "condition": {
-      "urlFilter": "trackcmp.net",
+      "urlFilter": "||trackcmp.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1156,7 +1141,7 @@
     },
     "comment": "Mailchimp / Mandrill web tracking",
     "condition": {
-      "urlFilter": "chimpstatic.com",
+      "urlFilter": "||chimpstatic.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1172,7 +1157,7 @@
     },
     "comment": "Drip \u2014 ecommerce behavioral tracking",
     "condition": {
-      "urlFilter": "getdrip.com",
+      "urlFilter": "||getdrip.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1188,7 +1173,7 @@
     },
     "comment": "Braze / Appboy \u2014 in-app and cross-site engagement tracking",
     "condition": {
-      "urlFilter": "braze.com",
+      "urlFilter": "||braze.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1204,7 +1189,7 @@
     },
     "comment": "New Relic browser agent \u2014 sends user behavior data",
     "condition": {
-      "urlFilter": "newrelic.com",
+      "urlFilter": "||newrelic.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1219,7 +1204,7 @@
     },
     "comment": "Dynatrace RUM \u2014 real-user monitoring with behavioral data",
     "condition": {
-      "urlFilter": "dynatrace.com",
+      "urlFilter": "||dynatrace.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1234,7 +1219,7 @@
     },
     "comment": "Optimizely \u2014 A/B testing with visitor profiling",
     "condition": {
-      "urlFilter": "optimizely.com",
+      "urlFilter": "||optimizely.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1250,7 +1235,7 @@
     },
     "comment": "VWO (Visual Website Optimizer) \u2014 A/B testing tracker",
     "condition": {
-      "urlFilter": "vwo.com",
+      "urlFilter": "||vwo.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1266,7 +1251,7 @@
     },
     "comment": "AB Tasty \u2014 conversion optimization and user profiling",
     "condition": {
-      "urlFilter": "abtasty.com",
+      "urlFilter": "||abtasty.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1282,7 +1267,7 @@
     },
     "comment": "Contentsquare (ex-Clicktale) \u2014 deep behavioral analytics",
     "condition": {
-      "urlFilter": "contentsquare.net",
+      "urlFilter": "||contentsquare.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1298,7 +1283,7 @@
     },
     "comment": "Heap Analytics \u2014 auto-captures all user interactions",
     "condition": {
-      "urlFilter": "heapanalytics.com",
+      "urlFilter": "||heapanalytics.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1314,7 +1299,7 @@
     },
     "comment": "Pendo.io \u2014 in-app behavioral analytics and tracking",
     "condition": {
-      "urlFilter": "pendo.io",
+      "urlFilter": "||pendo.io^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1330,7 +1315,7 @@
     },
     "comment": "PostHog cloud \u2014 product analytics (cloud edition)",
     "condition": {
-      "urlFilter": "app.posthog.com",
+      "urlFilter": "||app.posthog.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1345,7 +1330,7 @@
     },
     "comment": "OneSignal \u2014 push notification SDK with tracking",
     "condition": {
-      "urlFilter": "onesignal.com",
+      "urlFilter": "||onesignal.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1361,7 +1346,7 @@
     },
     "comment": "PushCrew / VWO Engage \u2014 push notifications",
     "condition": {
-      "urlFilter": "pushcrew.com",
+      "urlFilter": "||pushcrew.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1377,7 +1362,7 @@
     },
     "comment": "Pusher Beams \u2014 push notification service with analytics",
     "condition": {
-      "urlFilter": "pusher.com",
+      "urlFilter": "||pusher.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1392,7 +1377,7 @@
     },
     "comment": "CoinHive (defunct but still served in archives) \u2014 CPU miner",
     "condition": {
-      "urlFilter": "coinhive.com",
+      "urlFilter": "||coinhive.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1407,7 +1392,7 @@
     },
     "comment": "Crypto-Loot \u2014 in-browser CPU mining",
     "condition": {
-      "urlFilter": "crypto-loot.com",
+      "urlFilter": "||crypto-loot.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1422,7 +1407,7 @@
     },
     "comment": "JSECoin \u2014 JavaScript-based browser miner",
     "condition": {
-      "urlFilter": "jsecoin.com",
+      "urlFilter": "||jsecoin.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest"
@@ -1437,7 +1422,7 @@
     },
     "comment": "Propeller Ads \u2014 pop-under ads, known for aggressive delivery",
     "condition": {
-      "urlFilter": "propellerads.com",
+      "urlFilter": "||propellerads.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1454,7 +1439,7 @@
     },
     "comment": "PopAds \u2014 pop-under advertising",
     "condition": {
-      "urlFilter": "popads.net",
+      "urlFilter": "||popads.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1471,7 +1456,7 @@
     },
     "comment": "TrafficFactory \u2014 adult and aggressive redirect ads",
     "condition": {
-      "urlFilter": "trafficfactory.biz",
+      "urlFilter": "||trafficfactory.biz^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1488,7 +1473,7 @@
     },
     "comment": "ExoClick \u2014 adult ad network with heavy fingerprinting",
     "condition": {
-      "urlFilter": "exoclick.com",
+      "urlFilter": "||exoclick.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1505,7 +1490,7 @@
     },
     "comment": "Traffic Junky \u2014 aggressive video ad network",
     "condition": {
-      "urlFilter": "trafficjunky.net",
+      "urlFilter": "||trafficjunky.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1522,7 +1507,7 @@
     },
     "comment": "Clickadu \u2014 pop-up and push notification ads",
     "condition": {
-      "urlFilter": "clickadu.com",
+      "urlFilter": "||clickadu.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1539,7 +1524,7 @@
     },
     "comment": "Adsterra \u2014 aggressive pop-up and redirect ads",
     "condition": {
-      "urlFilter": "adsterra.com",
+      "urlFilter": "||adsterra.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1556,7 +1541,7 @@
     },
     "comment": "HilltopAds \u2014 pop-under ad network",
     "condition": {
-      "urlFilter": "hilltopads.net",
+      "urlFilter": "||hilltopads.net^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1573,7 +1558,7 @@
     },
     "comment": "RichPush \u2014 aggressive push notification ads",
     "condition": {
-      "urlFilter": "richpush.co",
+      "urlFilter": "||richpush.co^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",
@@ -1590,7 +1575,135 @@
     },
     "comment": "EZmob \u2014 mobile pop-under and interstitial ads",
     "condition": {
-      "urlFilter": "ezmob.com",
+      "urlFilter": "||ezmob.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 101,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||demdex.net^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 102,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||omtrdc.net^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 103,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||2mdn.net^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 104,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||bidswitch.net^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 105,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||adform.net^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 106,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||smartadserver.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 107,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||mathtag.com^",
+      "resourceTypes": [
+        "script",
+        "xmlhttprequest",
+        "image",
+        "sub_frame"
+      ]
+    }
+  },
+  {
+    "id": 108,
+    "priority": 1,
+    "action": {
+      "type": "block"
+    },
+    "condition": {
+      "urlFilter": "||rfihub.com^",
       "resourceTypes": [
         "script",
         "xmlhttprequest",

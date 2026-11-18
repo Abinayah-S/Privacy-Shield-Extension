@@ -5,7 +5,7 @@ Features:
 
 Core Blocking Features:
 
-Real-time Tracker Detection: Blocks 200+ known tracking domains including:
+Real-time Tracker Detection: Blocks 100+ curated tracking domains (see rules.json) including:
 
 Google Analytics (`google-analytics.com`, `googletagmanager.com`)
 DoubleClick (`doubleclick.net`, `pagead2.googlesyndication.com`)
@@ -266,6 +266,11 @@ Solution:
 Close popup and reopen
 Check Settings → Analytics
 May need to refresh the website
+
+# Browser Compatibility
+- Chrome, Edge, Brave, Opera, Vivaldi (Chromium, Manifest V3): supported.
+- Firefox: not supported as-is. Firefox still uses background scripts rather than a service worker and lacks getMatchedRules, so statistics will not work. Blocking is partially supported only.
+- Safari: requires conversion with Xcode (xcrun safari-web-extension-converter) and has limited declarativeNetRequest support. Not tested.
 
 # Firefox Support
 The extension is designed to be easily portable to Firefox:

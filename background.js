@@ -1,212 +1,183 @@
-const STATIC_TRACKER_DOMAINS = [
-  "google-analytics.com", "doubleclick.net", "facebook.net",
-  "googlesyndication.com", "amazon-adsystem.com", "criteo.com",
-  "taboola.com", "hotjar.com", "mixpanel.com", "googletagmanager.com",
-  "outbrain.com", "scorecardresearch.com", "segment.io", "optimizely.com",
-  "ads.yahoo.com", "bing.com", "tiktok.com", "twitter.com",
-  "snap.licdn.com", "adnxs.com"
-];
+// Privacy Shield v1.2 background service worker
+// Changes from 1.1: alarms instead of setInterval (MV3 workers are killed when idle),
+// getMatchedRules with minTimeStamp instead of a running-count delta,
+// domain attribution through rule IDs (works in packed builds), no double counting,
+// enabled state restored on browser startup, real CLEAR_DATA behaviour.
+
+const STATIC_RULESET = "static_blocklist";
+const POLL_ALARM = "pollMatches";
+const POLL_MINUTES = 0.5; // Chrome enforces a 30 second minimum for packed extensions
+
+let staticDomainMap = null; // ruleId -> domain, loaded from rules.json
+let polling = false;
 
 function todayString() {
-  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  return new Date().toISOString().slice(0, 10);
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
-  chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
+function cleanDomain(urlFilter) {
+  return (urlFilter || "")
+    .replace(/^\|\|/, "")
+    .replace(/\^$/, "")
+    .replace(/^www\./, "");
+}
 
-  const stored = await chrome.storage.local.get(["enabled", "stats", "trackerLog", "whitelist", "blacklist", "initialized"]);
-  if (stored.enabled === undefined) await chrome.storage.local.set({ enabled: true });
-  if (!stored.stats) {
-    await chrome.storage.local.set({
-      stats: {
-        totalBlocked: 0,
-        todayBlocked: 0,
-        lastResetDate: todayString(),
-        lastMatchedCount: 0,
-        uniqueTrackers: {}
-      }
-    });
-  }
-  if (!stored.trackerLog) await chrome.storage.local.set({ trackerLog: [] });
-  if (!stored.whitelist) await chrome.storage.local.set({ whitelist: [] });
-  if (!stored.blacklist) await chrome.storage.local.set({ blacklist: [] });
+function freshStats() {
+  return { totalBlocked: 0, todayBlocked: 0, lastResetDate: todayString(), uniqueTrackers: {} };
+}
 
-  // Start polling for accurate counts
-  startPolling();
-});
-
-chrome.runtime.onStartup.addListener(() => {
-  startPolling();
-});
-
-// ---------------------------------------------------------------------------
-// Accurate blocking via getMatchedRules polling
-// This works in both packed and unpacked mode (unlike onRuleMatchedDebug)
-// ---------------------------------------------------------------------------
-
-let lastKnownMatchCount = 0;
-
-async function pollMatchedRules() {
+async function loadStaticMap() {
+  if (staticDomainMap) return staticDomainMap;
+  staticDomainMap = {};
   try {
-    const stored = await chrome.storage.local.get(["stats", "trackerLog"]);
-    let stats = stored.stats || {
-      totalBlocked: 0,
-      todayBlocked: 0,
-      lastResetDate: todayString(),
-      lastMatchedCount: 0,
-      uniqueTrackers: {}
-    };
-    const log = stored.trackerLog || [];
+    const res = await fetch(chrome.runtime.getURL("rules.json"));
+    const rules = await res.json();
+    for (const r of rules) staticDomainMap[r.id] = cleanDomain(r.condition.urlFilter);
+  } catch (e) {
+    console.error("Privacy Shield: could not load rules.json", e);
+  }
+  return staticDomainMap;
+}
 
-    // Daily reset check
-    const today = todayString();
-    if (stats.lastResetDate !== today) {
+async function applyEnabled(enabled) {
+  if (enabled) {
+    await chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds: [STATIC_RULESET] });
+    chrome.action.setBadgeText({ text: "" });
+  } else {
+    await chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: [STATIC_RULESET] });
+    chrome.action.setBadgeText({ text: "OFF" });
+    chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
+  }
+}
+
+// Records blocked requests that happened since the last poll.
+async function recordMatches() {
+  if (polling) return;
+  polling = true;
+  try {
+    const { enabled, stats: storedStats, trackerLog, lastPoll } =
+      await chrome.storage.local.get(["enabled", "stats", "trackerLog", "lastPoll"]);
+    if (enabled === false) return;
+
+    const since = lastPoll ?? Date.now();
+    const now = Date.now();
+
+    const statics = await loadStaticMap();
+    const dynamic = await chrome.declarativeNetRequest.getDynamicRules();
+    const dynMap = new Map(dynamic.map(r => [r.id, {
+      domain: cleanDomain(r.condition.urlFilter || (r.condition.requestDomains || [])[0]),
+      type: r.action.type
+    }]));
+
+    const { rulesMatchedInfo = [] } = await chrome.declarativeNetRequest.getMatchedRules({ minTimeStamp: since });
+
+    const stats = storedStats || freshStats();
+    const log = trackerLog || [];
+    if (stats.lastResetDate !== todayString()) {
       stats.todayBlocked = 0;
-      stats.lastResetDate = today;
-      stats.lastMatchedCount = 0;
-      lastKnownMatchCount = 0;
+      stats.lastResetDate = todayString();
+    }
+    stats.uniqueTrackers = stats.uniqueTrackers || {};
+
+    let added = 0;
+    for (const hit of rulesMatchedInfo) {
+      const id = hit.rule.ruleId;
+      let domain = null;
+      if (dynMap.has(id)) {
+        const info = dynMap.get(id);
+        if (info.type !== "block") continue; // allow rules are not blocks
+        domain = info.domain;
+      } else if (statics[id]) {
+        domain = statics[id];
+      }
+      if (!domain) continue;
+
+      added++;
+      stats.uniqueTrackers[domain] = (stats.uniqueTrackers[domain] || 0) + 1;
+      log.unshift({ domain, time: hit.timeStamp || now, tabId: hit.tabId });
     }
 
-    // Get actual matched rules from the browser
-    const matched = await chrome.declarativeNetRequest.getMatchedRules({});
-    const currentCount = matched.rulesMatchedInfo ? matched.rulesMatchedInfo.length : 0;
+    if (log.length > 200) log.length = 200;
+    stats.totalBlocked = (stats.totalBlocked || 0) + added;
+    stats.todayBlocked = (stats.todayBlocked || 0) + added;
 
-    // Only count new matches since last poll
-    const lastCount = stats.lastMatchedCount || lastKnownMatchCount || 0;
-    const newMatches = Math.max(0, currentCount - lastCount);
+    await chrome.storage.local.set({ stats, trackerLog: log, lastPoll: now });
 
-    if (newMatches > 0) {
-      stats.totalBlocked = (stats.totalBlocked || 0) + newMatches;
-      stats.todayBlocked = (stats.todayBlocked || 0) + newMatches;
-      stats.lastMatchedCount = currentCount;
-      lastKnownMatchCount = currentCount;
-
-      // Log new matched domains
-      const newEntries = matched.rulesMatchedInfo
-        ? matched.rulesMatchedInfo.slice(lastCount).slice(0, newMatches)
-        : [];
-
-      for (const entry of newEntries) {
-        try {
-          const domain = new URL(entry.request.url).hostname.replace(/^www\./, "");
-          stats.uniqueTrackers = stats.uniqueTrackers || {};
-          stats.uniqueTrackers[domain] = (stats.uniqueTrackers[domain] || 0) + 1;
-          log.unshift({ domain, url: entry.request.url, time: Date.now() });
-        } catch (e) { /* ignore malformed URL */ }
-      }
-      if (log.length > 200) log.length = 200;
-
-      await chrome.storage.local.set({ stats, trackerLog: log });
-
-      // Update badge with today's count
-      const enabled = (await chrome.storage.local.get(["enabled"])).enabled !== false;
-      if (enabled) {
-        chrome.action.setBadgeText({ text: String(stats.todayBlocked) });
-        chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
-      }
+    if (added > 0) {
+      chrome.action.setBadgeText({ text: String(stats.todayBlocked) });
+      chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
     }
   } catch (e) {
-    // getMatchedRules may not be available in all contexts — fall through silently
+    console.error("Privacy Shield: poll failed", e);
+  } finally {
+    polling = false;
   }
 }
 
-// Also keep onRuleMatchedDebug for dev-mode instant feedback
-if (chrome.declarativeNetRequest?.onRuleMatchedDebug) {
-  chrome.declarativeNetRequest.onRuleMatchedDebug.addListener(async (details) => {
-    try {
-      const stored = await chrome.storage.local.get(["stats", "trackerLog"]);
-      let stats = stored.stats || {
-        totalBlocked: 0, todayBlocked: 0, lastResetDate: todayString(),
-        lastMatchedCount: 0, uniqueTrackers: {}
-      };
-      const log = stored.trackerLog || [];
-
-      const today = todayString();
-      if (stats.lastResetDate !== today) {
-        stats.todayBlocked = 0;
-        stats.lastResetDate = today;
-      }
-
-      stats.totalBlocked = (stats.totalBlocked || 0) + 1;
-      stats.todayBlocked = (stats.todayBlocked || 0) + 1;
-
-      try {
-        const domain = new URL(details.request.url).hostname.replace(/^www\./, "");
-        stats.uniqueTrackers = stats.uniqueTrackers || {};
-        stats.uniqueTrackers[domain] = (stats.uniqueTrackers[domain] || 0) + 1;
-        log.unshift({ domain, url: details.request.url, time: Date.now() });
-        if (log.length > 200) log.pop();
-      } catch (e) {}
-
-      await chrome.storage.local.set({ stats, trackerLog: log });
-
-      const enabled = (await chrome.storage.local.get(["enabled"])).enabled !== false;
-      if (enabled) {
-        chrome.action.setBadgeText({ text: String(stats.todayBlocked) });
-        chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
-      }
-    } catch (err) {
-      console.error("Privacy Shield: error recording blocked request", err);
-    }
-  });
+async function ensureAlarm() {
+  const existing = await chrome.alarms.get(POLL_ALARM);
+  if (!existing) chrome.alarms.create(POLL_ALARM, { periodInMinutes: POLL_MINUTES });
 }
 
-function startPolling() {
-  // Poll every 3 seconds for accurate real-time counts
-  setInterval(pollMatchedRules, 3000);
-  // Also poll immediately
-  pollMatchedRules();
-}
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === POLL_ALARM) recordMatches();
+});
 
-// Start polling when service worker wakes
-startPolling();
+chrome.runtime.onInstalled.addListener(async () => {
+  const stored = await chrome.storage.local.get(["enabled", "stats", "trackerLog", "whitelist", "blacklist"]);
+  const defaults = {};
+  if (stored.enabled === undefined) defaults.enabled = true;
+  if (!stored.stats) defaults.stats = freshStats();
+  if (!stored.trackerLog) defaults.trackerLog = [];
+  if (!stored.whitelist) defaults.whitelist = [];
+  if (!stored.blacklist) defaults.blacklist = [];
+  defaults.lastPoll = Date.now();
+  await chrome.storage.local.set(defaults);
 
-// ---------------------------------------------------------------------------
-// Message handler
-// ---------------------------------------------------------------------------
+  await loadStaticMap();
+  await applyEnabled(defaults.enabled ?? stored.enabled);
+  await ensureAlarm();
+});
+
+// The manifest enables the static ruleset on every start, so re-apply the user's choice.
+chrome.runtime.onStartup.addListener(async () => {
+  const { enabled } = await chrome.storage.local.get(["enabled"]);
+  await loadStaticMap();
+  await applyEnabled(enabled !== false);
+  await ensureAlarm();
+  await chrome.storage.local.set({ lastPoll: Date.now() });
+});
+
+// Service worker wake-up outside install/startup: make sure the alarm exists.
+ensureAlarm();
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.type === "TOGGLE_EXTENSION") {
-    chrome.storage.local.set({ enabled: msg.enabled }, () => {
-      if (!msg.enabled) {
-        chrome.action.setBadgeText({ text: "OFF" });
-        chrome.action.setBadgeBackgroundColor({ color: "#6b7280" });
-        chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: ["static_blocklist"] });
-      } else {
-        chrome.action.setBadgeText({ text: "" });
-        chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
-        chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds: ["static_blocklist"] });
-      }
+  (async () => {
+    if (msg.type === "TOGGLE_EXTENSION") {
+      await chrome.storage.local.set({ enabled: msg.enabled });
+      await applyEnabled(msg.enabled);
       sendResponse({ ok: true });
-    });
-    return true;
-  }
-
-  if (msg.type === "CLEAR_DATA") {
-    const fresh = {
-      enabled: true,
-      whitelist: [],
-      blacklist: [],
-      stats: {
-        totalBlocked: 0,
-        todayBlocked: 0,
-        lastResetDate: todayString(),
-        lastMatchedCount: 0,
-        uniqueTrackers: {}
-      },
-      trackerLog: []
-    };
-    chrome.storage.local.set(fresh, () => {
+    } else if (msg.type === "CLEAR_DATA") {
+      const dyn = await chrome.declarativeNetRequest.getDynamicRules();
+      if (dyn.length) {
+        await chrome.declarativeNetRequest.updateDynamicRules({ removeRuleIds: dyn.map(r => r.id) });
+      }
+      const { enabled } = await chrome.storage.local.get(["enabled"]);
+      await chrome.storage.local.set({
+        enabled: enabled !== false,
+        whitelist: [],
+        blacklist: [],
+        stats: freshStats(),
+        trackerLog: [],
+        lastPoll: Date.now()
+      });
       chrome.action.setBadgeText({ text: "" });
       chrome.action.setBadgeBackgroundColor({ color: "#ef4444" });
-      lastKnownMatchCount = 0;
       sendResponse({ ok: true });
-    });
-    return true;
-  }
-
-  if (msg.type === "GET_STATIC_DOMAINS") {
-    sendResponse({ domains: STATIC_TRACKER_DOMAINS });
-    return true;
-  }
+    } else if (msg.type === "GET_STATIC_DOMAINS") {
+      const map = await loadStaticMap();
+      sendResponse({ domains: [...new Set(Object.values(map))] });
+    }
+  })();
+  return true;
 });
