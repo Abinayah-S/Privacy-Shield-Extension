@@ -1,4 +1,4 @@
-# Tracker-Blocker-Extension
+# Privacy-Shield-Extension
 A powerful, privacy-focused browser extension that blocks known tracking scripts and domains in real-time. Tracker Blocker helps protect your online privacy by preventing advertisers, analytics services, and other trackers from monitoring your browsing activity.
 
 Features:
